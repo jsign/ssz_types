@@ -10,6 +10,10 @@ documentation = "https://docs.rs/ssz_types"
 keywords = ["ethereum"]
 categories = ["cryptography::cryptocurrencies"]
 
+[features]
+default = ["std"]
+std = []
+
 [dependencies]
 tree_hash = { version = "0.10.0", default-features = false }
 ethereum_serde_utils = "0.8.0"

@@ -1,10 +1,13 @@
+use alloc::format;
+use alloc::vec;
+use alloc::vec::Vec;
 use crate::tree_hash::vec_tree_hash_root;
 use crate::Error;
+use core::marker::PhantomData;
+use core::ops::{Deref, DerefMut, Index, IndexMut};
+use core::slice::SliceIndex;
 use serde::Deserialize;
 use serde_derive::Serialize;
-use std::marker::PhantomData;
-use std::ops::{Deref, DerefMut, Index, IndexMut};
-use std::slice::SliceIndex;
 use tree_hash::Hash256;
 use typenum::Unsigned;
 
@@ -61,8 +64,8 @@ impl<T: PartialEq, N> PartialEq for VariableList<T, N> {
     }
 }
 impl<T: Eq, N> Eq for VariableList<T, N> {}
-impl<T: std::hash::Hash, N> std::hash::Hash for VariableList<T, N> {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+impl<T: core::hash::Hash, N> core::hash::Hash for VariableList<T, N> {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
         self.vec.hash(state);
     }
 }
@@ -189,7 +192,7 @@ impl<T, N: Unsigned> DerefMut for VariableList<T, N> {
 
 impl<'a, T, N: Unsigned> IntoIterator for &'a VariableList<T, N> {
     type Item = &'a T;
-    type IntoIter = std::slice::Iter<'a, T>;
+    type IntoIter = core::slice::Iter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
@@ -198,7 +201,7 @@ impl<'a, T, N: Unsigned> IntoIterator for &'a VariableList<T, N> {
 
 impl<T, N: Unsigned> IntoIterator for VariableList<T, N> {
     type Item = T;
-    type IntoIter = std::vec::IntoIter<T>;
+    type IntoIter = alloc::vec::IntoIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.vec.into_iter()
@@ -257,13 +260,13 @@ impl<T, N: Unsigned> ssz::TryFromIter<T> for VariableList<T, N> {
         I: IntoIterator<Item = T>,
     {
         let n = N::to_usize();
-        let clamped_n = std::cmp::min(MAX_ELEMENTS_TO_PRE_ALLOCATE, n);
+        let clamped_n = core::cmp::min(MAX_ELEMENTS_TO_PRE_ALLOCATE, n);
         let iter = value.into_iter();
 
         // Pre-allocate up to `N` elements based on the iterator size hint.
         let (_, opt_max_len) = iter.size_hint();
         let mut l = Self::new(Vec::with_capacity(
-            opt_max_len.map_or(clamped_n, |max_len| std::cmp::min(clamped_n, max_len)),
+            opt_max_len.map_or(clamped_n, |max_len| core::cmp::min(clamped_n, max_len)),
         ))?;
         for item in iter {
             l.push(item)?;
@@ -345,7 +348,7 @@ impl<'a, T: arbitrary::Arbitrary<'a>, N: 'static + Unsigned> arbitrary::Arbitrar
     fn arbitrary(u: &mut arbitrary::Unstructured<'a>) -> arbitrary::Result<Self> {
         let max_size = N::to_usize();
         let rand = usize::arbitrary(u)?;
-        let size = std::cmp::min(rand, max_size);
+        let size = core::cmp::min(rand, max_size);
         let mut vec: Vec<T> = Vec::with_capacity(size);
         for _ in 0..size {
             vec.push(<T>::arbitrary(u)?);

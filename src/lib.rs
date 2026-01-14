@@ -37,6 +37,10 @@
 //!
 //! ```
 
+#![cfg_attr(not(feature = "std"), no_std)]
+
+extern crate alloc;
+
 #[macro_use]
 mod fixed_vector;
 pub mod serde_utils;

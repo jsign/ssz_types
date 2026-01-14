@@ -1,10 +1,13 @@
+use alloc::format;
+use alloc::vec;
+use alloc::vec::Vec;
 use crate::tree_hash::vec_tree_hash_root;
 use crate::Error;
+use core::marker::PhantomData;
+use core::ops::{Deref, DerefMut, Index, IndexMut};
+use core::slice::SliceIndex;
 use serde::Deserialize;
 use serde_derive::Serialize;
-use std::marker::PhantomData;
-use std::ops::{Deref, DerefMut, Index, IndexMut};
-use std::slice::SliceIndex;
 use tree_hash::Hash256;
 use typenum::Unsigned;
 
@@ -59,8 +62,8 @@ impl<T: PartialEq, N> PartialEq for FixedVector<T, N> {
     }
 }
 impl<T: Eq, N> Eq for FixedVector<T, N> {}
-impl<T: std::hash::Hash, N> std::hash::Hash for FixedVector<T, N> {
-    fn hash<H: std::hash::Hasher>(&self, state: &mut H) {
+impl<T: core::hash::Hash, N> core::hash::Hash for FixedVector<T, N> {
+    fn hash<H: core::hash::Hasher>(&self, state: &mut H) {
         self.vec.hash(state);
     }
 }
@@ -173,7 +176,7 @@ impl<T, N: Unsigned> DerefMut for FixedVector<T, N> {
 
 impl<'a, T, N: Unsigned> IntoIterator for &'a FixedVector<T, N> {
     type Item = &'a T;
-    type IntoIter = std::slice::Iter<'a, T>;
+    type IntoIter = core::slice::Iter<'a, T>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
@@ -182,7 +185,7 @@ impl<'a, T, N: Unsigned> IntoIterator for &'a FixedVector<T, N> {
 
 impl<T, N: Unsigned> IntoIterator for FixedVector<T, N> {
     type Item = T;
-    type IntoIter = std::vec::IntoIter<T>;
+    type IntoIter = alloc::vec::IntoIter<T>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.vec.into_iter()
@@ -262,7 +265,7 @@ impl<T, N: Unsigned> ssz::TryFromIter<T> for FixedVector<T, N> {
 
         let (_, opt_max_len) = iter.size_hint();
         let mut vec =
-            Vec::with_capacity(opt_max_len.map_or(n, |max_len| std::cmp::min(n, max_len)));
+            Vec::with_capacity(opt_max_len.map_or(n, |max_len| core::cmp::min(n, max_len)));
 
         for item in iter {
             // Bail out as soon as the length tries to exceed the limit. This guards against
