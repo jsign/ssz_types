@@ -14,7 +14,10 @@ categories = ["cryptography::cryptocurrencies"]
 tree_hash = "0.10.0"
 ethereum_serde_utils = "0.8.0"
 ethereum_ssz = "0.9.0"
-serde = "1.0.0"
+serde = { version = "1.0", default-features = false, features = [
+    "alloc",
+    "derive",
+] }
 serde_derive = "1.0.0"
 typenum = "1.12.0"
 smallvec = "1.8.0"
